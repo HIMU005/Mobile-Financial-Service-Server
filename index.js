@@ -15,6 +15,7 @@ app.use(express.json());
 // app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.6xa5uzm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -36,6 +37,20 @@ async function run() {
 
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/user/phone/:number", async (req, res) => {
+      const number = req.params.number;
+      const result = await userCollection.findOne({ phone: number });
+      console.log(result);
+      res.send(result);
+    });
+
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await userCollection.findOne({ email });
+      console.log(result);
       res.send(result);
     });
 
