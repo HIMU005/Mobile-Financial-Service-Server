@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const corsOptions = {
@@ -29,6 +31,15 @@ async function run() {
     // collection name
     const userCollection = client.db("MobileBanking").collection("users");
 
+    //jwt
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "3h",
+      });
+      res.send({ token });
+    });
+
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       const result = await userCollection.insertOne(newUser);
@@ -43,14 +54,12 @@ async function run() {
     app.get("/user/phone/:number", async (req, res) => {
       const number = req.params.number;
       const result = await userCollection.findOne({ phone: number });
-      console.log(result);
       res.send(result);
     });
 
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const result = await userCollection.findOne({ email });
-      console.log(result);
       res.send(result);
     });
 
