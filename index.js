@@ -40,23 +40,43 @@ async function run() {
       res.send({ token });
     });
 
+    // Verify Token Middleware
+    const verifyToken = async (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      const token = req.headers.authorization;
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.decoded = decoded;
+        console.log("verify token ok");
+        next();
+      });
+    };
+
+    //post a user info
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       const result = await userCollection.insertOne(newUser);
       res.send(result);
     });
 
+    // get all user info
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
 
+    // get a user info using phone number
     app.get("/user/phone/:number", async (req, res) => {
       const number = req.params.number;
       const result = await userCollection.findOne({ phone: number });
       res.send(result);
     });
 
+    // get a single user info using email
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const result = await userCollection.findOne({ email });
